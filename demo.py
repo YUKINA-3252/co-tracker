@@ -82,7 +82,7 @@ if __name__ == "__main__":
         grid_size=args.grid_size,
         grid_query_frame=args.grid_query_frame,
         backward_tracking=args.backward_tracking,
-        # segm_mask=segm_mask
+        segm_mask=segm_mask
     )
     print("computed")
 

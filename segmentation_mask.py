@@ -72,12 +72,7 @@ if __name__ == "__main__":
 
     window_frames = []
 
-    queries = torch.tensor([
-        [0., 1400., 800.]
-    ])
-    queries = queries.to(DEFAULT_DEVICE)
-
-    def _process_step(window_frames, is_first_step, queries):
+    def _process_step(window_frames, is_first_step, grid_size, segm_mask):
         video_chunk = (
             torch.tensor(np.stack(window_frames[-model.step * 2:]), device=DEFAULT_DEVICE)
             .float()
@@ -86,7 +81,8 @@ if __name__ == "__main__":
         return model(
             video_chunk,
             is_first_step=is_first_step,
-            queries=queries[None]
+            grid_size=grid_size,
+            segm_mask=segm_mask,
         )
 
     # Iterating over video frames, processing one window at a time:
@@ -101,7 +97,8 @@ if __name__ == "__main__":
             pred_tracks, pred_visibility = _process_step(
                 window_frames,
                 is_first_step,
-                queries=queries,
+                args.grid_size,
+                segm_mask,
             )
             is_first_step = False
         window_frames.append(frame)
@@ -109,7 +106,8 @@ if __name__ == "__main__":
     pred_tracks, pred_visibility = _process_step(
         window_frames[-(i % model.step) - model.step - 1 :],
         is_first_step,
-        queries = queries,
+        args.grid_size,
+        segm_mask,
     )
 
     # pred_tracks, pred_visibility = model(
