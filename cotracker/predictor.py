@@ -4,6 +4,11 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+import cv2
+# from datetime import datetime
+import numpy as np
+import os
+
 import torch
 import torch.nn.functional as F
 
@@ -200,6 +205,7 @@ class CoTrackerOnlinePredictor(torch.nn.Module):
         grid_size: int = 10,
         grid_query_frame: int = 0,
         add_support_grid=False,
+            segm_mask: torch.Tensor = None
     ):
         B, T, C, H, W = video_chunk.shape
         # Initialize online video processing and save queried points
@@ -220,6 +226,13 @@ class CoTrackerOnlinePredictor(torch.nn.Module):
                 grid_pts = get_points_on_a_grid(
                     grid_size, self.interp_shape, device=video_chunk.device
                 )
+                if segm_mask is not None:
+                    segm_mask = F.interpolate(segm_mask, tuple(self.interp_shape), mode="nearest")
+                    point_mask = segm_mask[0, 0][
+                        (grid_pts[0, :, 1]).round().long().cpu(),
+                        (grid_pts[0, :, 0]).round().long().cpu(),
+                        ].bool()
+                    grid_pts = grid_pts[:, point_mask]
                 queries = torch.cat(
                     [torch.ones_like(grid_pts[:, :, :1]) * grid_query_frame, grid_pts],
                     dim=2,
@@ -246,6 +259,7 @@ class CoTrackerOnlinePredictor(torch.nn.Module):
             is_online=True,
         )
         thr = 0.9
+
         return (
             tracks
             * tracks.new_tensor(
