@@ -1,0 +1,17 @@
+assets
+saved_videos
+venv
+*.jpg
+*.png
+*.mp4
+checkpoints/
+cotracker.egg-info/
+cotracker/__pycache__/
+cotracker/models/__pycache__/
+cotracker/models/core/__pycache__/
+cotracker/models/core/cotracker/__pycache__/
+cotracker/utils/__pycache__/
+\#*
+*~
+iwata/rgb_image/
+iwata/rosbag/
